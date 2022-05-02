@@ -23,3 +23,6 @@ export function getComponentNames(): Record<string, string[]> {
     }
     return result
 }
+export function getComponentTypes(): string[] {
+    return Object.keys(components)
+}
