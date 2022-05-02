@@ -12,7 +12,7 @@ import { Result } from './result'
 
 export type TaskInfo = {
     ExpectedArgs: Bounds
-    OnTask: (args: string[], respond: (message: string) => void) => [boolean, string]
+    OnTask: (args: string[], respond: (message: string) => void) => Result<string>
 }
 
 let tasks: Record<string, TaskInfo> = {}
