@@ -1,0 +1,6 @@
+# Ignore Webpack output
+*
+*/
+!.gitignore
+!index.html
+!favicon.ico
