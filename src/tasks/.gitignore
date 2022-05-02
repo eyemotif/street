@@ -1,0 +1,3 @@
+*.ts
+!defaultTasks.ts
+!taskRegistry.ts
