@@ -6,6 +6,8 @@
     - Third dimension: All the different elements that are executed at the same
       time per Word, called the Multis.
 */
+export const MAX_QUEUE_LENGTH = 10
+
 let mediaQueues: Record<string, string[][][]> = {
     'audio': []
 }

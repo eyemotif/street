@@ -2,7 +2,7 @@ import { registerTask } from '../task'
 import { getComponent } from '../page'
 import { Result } from '../result'
 import { getComponentNames } from '../component'
-import { getMediaQueue, setMediaQueue } from '../queue'
+import { getMediaQueue, MAX_QUEUE_LENGTH, setMediaQueue } from '../queue'
 
 registerTask('~components', {
     ExpectedArgs: { type: 'exactly', value: 0 },
@@ -26,7 +26,17 @@ registerTask('~flush', {
 registerTask('audio', {
     ExpectedArgs: { type: 'atLeast', value: 1 },
     OnTask: (args, _respond): Result<string> => {
-        const queueSpot = args.map(arg => arg.split(':'))
+        const audioComponents = new Set<string>(getComponentNames()['audio'])
+
+        const queueSpot =
+            args
+                .map(arg => arg.split(':'))
+                .map(multi => multi.filter(m => audioComponents.has(m)))
+                .filter(arg => arg.length > 0)
+
+        if (queueSpot.length === 0) return [true]
+        if (queueSpot.length > MAX_QUEUE_LENGTH) queueSpot.splice(MAX_QUEUE_LENGTH)
+
         let queue = getMediaQueue('audio')
         queue.push(queueSpot)
         setMediaQueue('audio', queue)
