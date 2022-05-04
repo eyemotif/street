@@ -2,7 +2,8 @@ import { ComponentInfo } from './component'
 import { fireEvent } from './event'
 
 export function addComponent(type: string, name: string, component: ComponentInfo) {
-    let div = document.getElementById(type)!
+    let div = document.getElementById(type)
+    if (div === null) throw `Invalid component type "${type}"`
     switch (type) {
         case 'audio':
             let audioTag = document.createElement('audio')
