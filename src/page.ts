@@ -22,3 +22,9 @@ export function addComponent(type: string, name: string, component: ComponentInf
 export function getComponent(type: string, name: string): HTMLElement | null {
     return document.getElementById(`${type}-${name}`)
 }
+
+export function htmlEscape(text: string): string {
+    const tempDiv = document.createElement('div')
+    tempDiv.innerText = text
+    return tempDiv.innerHTML
+}

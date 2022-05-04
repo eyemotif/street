@@ -1,8 +1,9 @@
 import { registerTask } from '../task'
-import { getComponent } from '../page'
+import { getComponent, htmlEscape } from '../page'
 import { Result } from '../result'
 import { getComponentNames } from '../component'
 import { getMediaQueue, MAX_QUEUE_LENGTH, setMediaQueue } from '../queue'
+import { getCachedEmote, getCachedEmoteNames, replaceEmotes } from '../twitch/emote'
 
 registerTask('~components', {
     ExpectedArgs: { type: 'exactly', value: 0 },
@@ -49,5 +50,39 @@ registerTask('audio', {
             return [true]
         }
         else return [true]
+    }
+})
+
+registerTask('~emotes', {
+    ExpectedArgs: { type: 'exactly', value: 0 },
+    OnTask: (_args, respond): Result<string> => {
+        respond(getCachedEmoteNames().toString())
+        return [true]
+    }
+})
+
+registerTask('chat', {
+    ExpectedArgs: { type: 'atLeast', value: 2 },
+    OnTask: (args, _respond): Result<string> => {
+        const [replaceString, ...words] = args
+        replaceEmotes(words, replaceString.substring(1))
+            .then(replacement => {
+                let chatDiv = document.getElementById('chat')!
+                let chatP = document.createElement('p')
+
+                chatP.innerHTML =
+                    replacement.map(r => {
+                        switch (r.type) {
+                            case 'text': return chatP.innerHTML += htmlEscape(r.text + ' ')
+                            case 'emote': return `<img src="${r.emote.X1!}"></img>`
+                        }
+                    })
+                        .join(' ')
+
+                chatDiv.appendChild(chatP)
+                if (chatDiv.childNodes.length > 10) chatDiv.removeChild(chatDiv.childNodes[0])
+            })
+            .catch(e => { throw e })
+        return [true]
     }
 })
