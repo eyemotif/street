@@ -24,9 +24,11 @@ body {
 .chat img {
     vertical-align: middle;
     padding: 0.25rem;
+    max-height: 4rem;
+    width: auto
 }
 
-.emoji {
-    width: 48px;
-    height: auto;
+.emoji,
+.badge {
+    height: 4rem;
 }

@@ -5,6 +5,7 @@ import { getComponentNames } from '../component'
 import { getMediaQueue, MAX_QUEUE_LENGTH, setMediaQueue } from '../queue'
 import { replaceEmotes } from '../twitch/emote'
 import twemoji from 'twemoji'
+import { getCachedUser, getUserBadges, setCachedUser, UserInfo } from '../twitch/chatter'
 
 registerTask('~components', {
     ExpectedArgs: { type: 'exactly', value: 0 },
@@ -62,16 +63,22 @@ registerTask('audio', {
 })
 
 registerTask('chat', {
-    ExpectedArgs: { type: 'atLeast', value: 4 },
+    ExpectedArgs: { type: 'atLeast', value: 3 },
     OnTask: (args, _respond): Result<string> => {
-        const [username, userColor, replaceString, ...words] = args
+        const [username, replaceString, ...words] = args
+        const cachedUser = getCachedUser(username)
         replaceEmotes(words, replaceString.substring(1))
             .then(replacement => {
                 let chatDiv = document.getElementById('chat')!
                 let chatP = document.createElement('p')
-
                 chatP.className = 'chat'
-                chatP.innerHTML += `<span style="color:${userColor}">${username}</span>: `
+
+                if (cachedUser) {
+                    for (const badge of getUserBadges(cachedUser)) {
+                        chatP.innerHTML += `<img class="badge" src="${badge.X4}"></img>`
+                    }
+                }
+                chatP.innerHTML += `<span style="color:${cachedUser?.Color ?? ''}">${cachedUser?.DisplayName ?? username}</span>: `
                 chatP.innerHTML +=
                     replacement.map(r => {
                         switch (r.type) {
@@ -86,6 +93,39 @@ registerTask('chat', {
                 if (chatDiv.childNodes.length > 20) chatDiv.removeChild(chatDiv.childNodes[0])
             })
             .catch(e => { throw e })
+        return [true]
+    }
+})
+
+registerTask('chat.user', {
+    ExpectedArgs: { type: 'exactly', value: 5 },
+    OnTask: (args, _respond): Result<string> => {
+        const [user, display, color, badges, badgeInfo] = args
+        const badgesList = badges.split(',').filter(s => s.length > 0)
+        const badgeInfoList = badgeInfo.split(',').filter(s => s.length)
+
+        let userInfo: UserInfo = {
+            DisplayName: display,
+            Color: color,
+            Subscriber: undefined,
+            Bits: undefined
+        }
+
+        for (const badge of badgesList) {
+            const [name, value] = badge.split('/')
+            if (!name || !value) continue
+            switch (name) {
+                case 'subscriber':
+                    userInfo.Subscriber = parseInt(value)
+                    break
+                case 'bits':
+                    userInfo.Bits = parseInt(value)
+                    break
+                default: break
+            }
+        }
+
+        setCachedUser(user, userInfo)
         return [true]
     }
 })

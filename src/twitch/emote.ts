@@ -166,9 +166,9 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
                     Code: replacers[i],
                     Provider: EmoteProvider.Twitch,
                     X1: static1.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0` : undefined,
-                    X2: static2.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0` : undefined,
-                    X3: static3.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0` : undefined,
-                    X4: static4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0` : undefined,
+                    X2: static2.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/2.0` : undefined,
+                    X3: static3.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/3.0` : undefined,
+                    X4: static4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/4.0` : undefined,
                 }
             }
         }

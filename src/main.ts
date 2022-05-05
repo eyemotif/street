@@ -6,23 +6,31 @@ import './styles/styleRegistry'
 import { getComponents } from './component'
 import { getTasks, testArgLength } from './task'
 import { addComponent } from './page'
-import { getChannelEmotes, getGlobalEmotes } from './twitch/emote'
+import { EmoteProvider, getChannelEmotes, getGlobalEmotes } from './twitch/emote'
 import { setBadges, setChannelID } from './twitch/channel'
 
 window.onload = () => {
     const url = new URL(window.location.href)
     const channel = url.searchParams.get('channel')
     const webSocketPort = url.searchParams.get('port') ?? '8000'
+    const noBadges = url.searchParams.get('noBadges') ?? 'false'
 
     getGlobalEmotes('all').then(_ => {
         console.log('Loaded global emotes!')
     })
     if (channel) {
-        getChannelEmotes('all', channel).then(_ => {
+        // if twitch channel emotes are loaded here then anyone can use any channel emote
+        getChannelEmotes([EmoteProvider.SevenTV, EmoteProvider.BetterTTV, EmoteProvider.FrankerFaceZ], channel).then(_ => {
             console.log('Loaded channel emotes!')
         })
         setChannelID(channel)
-            .then(() => setBadges())
+            .then(() => {
+                setBadges(noBadges === 'true')
+                console.log('Loaded channel badges!')
+            })
+    }
+    else {
+        setBadges(noBadges === 'true')
     }
 
     const components = getComponents()
@@ -36,7 +44,7 @@ window.onload = () => {
     const socket = new WebSocket(`ws://localhost:${webSocketPort}`)
     socket.onopen = function () {
         console.log('connected to server!')
-        socket.onclose = function () { console.error('server closed!') }
+        socket.onclose = function (event) { console.error(`socket closed! reason: ${event.reason}`) }
     }
     socket.onmessage = function (event) {
         const message = event.data as string
