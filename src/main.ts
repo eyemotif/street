@@ -1,11 +1,13 @@
 import './components/componentRegistry'
 import './events/eventRegistry'
 import './tasks/taskRegistry'
+import './styles/styleRegistry'
 
 import { getComponents } from './component'
 import { getTasks, testArgLength } from './task'
 import { addComponent } from './page'
 import { getChannelEmotes, getGlobalEmotes } from './twitch/emote'
+import { setBadges, setChannelID } from './twitch/channel'
 
 window.onload = () => {
     const url = new URL(window.location.href)
@@ -19,6 +21,8 @@ window.onload = () => {
         getChannelEmotes('all', channel).then(_ => {
             console.log('Loaded channel emotes!')
         })
+        setChannelID(channel)
+            .then(() => setBadges())
     }
 
     const components = getComponents()
@@ -41,7 +45,7 @@ window.onload = () => {
         if (taskInfo) {
             const [correctNumberOfArgs, errorAmount] = testArgLength(args.length, taskInfo)
             if (!correctNumberOfArgs) {
-                socket.send(`Invalid number of arguments for task "${task}". Got ${args.length}, got ${errorAmount}.`)
+                socket.send(`Invalid number of arguments for task "${task}". Got ${args.length}, expected ${errorAmount}.`)
                 return
             }
             const taskResult = taskInfo.OnTask(args, str => socket.send(str))
