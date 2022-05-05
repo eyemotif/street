@@ -117,9 +117,11 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
     let replacers: Record<number, string> = {}
 
     for (const replacer of (replaceString ?? '').split('/').filter(r => r.length > 0)) {
-        const [matched, name, start] = /(.+):(\d+)-(\d+)/.exec(replacer) ?? []
-        if (!matched) throw `Invalid replacer "${replacer}".`
-        replacers[parseInt(start)] = name
+        const [name, locStr] = replacer.split(':')
+        const locs = locStr.split(',')
+        const starts = locs.map(loc => /(\d+)-(\d+)/.exec(loc)![1])
+        for (const start of starts)
+            replacers[parseInt(start)] = name
     }
 
     let i = 0

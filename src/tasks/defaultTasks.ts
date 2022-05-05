@@ -23,6 +23,13 @@ registerTask('~flush', {
         else return [false, `Invalid queue "${args[0]}".`]
     }
 })
+registerTask('~channel', {
+    ExpectedArgs: { type: 'exactly', value: 0 },
+    OnTask: (_args, respond): Result<string> => {
+        respond(new URL(window.location.href).searchParams.get('channel') ?? '')
+        return [true]
+    }
+})
 
 registerTask('audio', {
     ExpectedArgs: { type: 'atLeast', value: 1 },
@@ -53,13 +60,13 @@ registerTask('audio', {
     }
 })
 
-registerTask('~emotes', {
-    ExpectedArgs: { type: 'exactly', value: 0 },
-    OnTask: (_args, respond): Result<string> => {
-        respond(getCachedEmoteNames().toString())
-        return [true]
-    }
-})
+// registerTask('~emotes', {
+//     ExpectedArgs: { type: 'exactly', value: 0 },
+//     OnTask: (_args, respond): Result<string> => {
+//         respond(getCachedEmoteNames().toString())
+//         return [true]
+//     }
+// })
 
 registerTask('chat', {
     ExpectedArgs: { type: 'atLeast', value: 2 },
@@ -73,7 +80,7 @@ registerTask('chat', {
                 chatP.innerHTML =
                     replacement.map(r => {
                         switch (r.type) {
-                            case 'text': return chatP.innerHTML += htmlEscape(r.text + ' ')
+                            case 'text': return htmlEscape(r.text + ' ')
                             case 'emote': return `<img src="${r.emote.X1!}"></img>`
                         }
                     })
