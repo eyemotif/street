@@ -5,35 +5,46 @@ import './styles/styleRegistry'
 
 import { getComponents } from './component'
 import { getTasks, testArgLength } from './task'
-import { addComponent } from './page'
+import { addComponent, modeSet, setModes } from './page'
 import { EmoteProvider, getChannelEmotes, getGlobalEmotes } from './twitch/emote'
 import { setBadges, setChannelID } from './twitch/channel'
 
+function loadExternalResources(channel: string | null, noBadges: boolean) {
+    if (modeSet('chat')) {
+        getGlobalEmotes('all').then(_ => {
+            console.log('Loaded global emotes!')
+        })
+        if (channel) {
+            setChannelID(channel)
+                .then(() => {
+                    setBadges(noBadges)
+                    console.log('Loaded channel badges!')
+                })
+            getChannelEmotes([EmoteProvider.SevenTV, EmoteProvider.BetterTTV, EmoteProvider.FrankerFaceZ], channel).then(_ => {
+                console.log('Loaded channel emotes!')
+            })
+        }
+        else {
+            setBadges(noBadges)
+        }
+    }
+    else {
+        if (channel) setChannelID(channel)
+    }
+}
+
 window.onload = () => {
     const url = new URL(window.location.href)
+    const modes = url.searchParams.get('mode')?.split(',') ?? 'all'
     const channel = url.searchParams.get('channel')
     const webSocketPort = url.searchParams.get('port') ?? '8000'
     const noBadges = (url.searchParams.get('noBadges') ?? 'false') === 'true'
-    const noChat = (url.searchParams.get('noChat') ?? 'false') === 'true'
+    const noRefresh = (url.searchParams.get('noRefresh') ?? 'false') === 'true'
 
-    getGlobalEmotes('all').then(_ => {
-        console.log('Loaded global emotes!')
-    })
-    if (channel) {
-        // if twitch channel emotes are loaded here then anyone can use the
-        // sub/follower emotes
-        getChannelEmotes([EmoteProvider.SevenTV, EmoteProvider.BetterTTV, EmoteProvider.FrankerFaceZ], channel).then(_ => {
-            console.log('Loaded channel emotes!')
-        })
-        setChannelID(channel)
-            .then(() => {
-                setBadges(noBadges)
-                console.log('Loaded channel badges!')
-            })
-    }
-    else {
-        setBadges(noBadges)
-    }
+    setModes(modes)
+    console.log(`Modes set: ${modes}`)
+
+    loadExternalResources(channel, noBadges)
 
     const components = getComponents()
     const tasks = getTasks()
@@ -42,18 +53,22 @@ window.onload = () => {
         for (const componentName in components[componentType])
             addComponent(componentType, componentName, components[componentType][componentName])
     }
+    console.log('Loaded components!')
 
     const socket = new WebSocket(`ws://${url.hostname}:${webSocketPort}`)
     socket.onopen = function () {
-        console.log('connected to server!')
-        socket.onclose = function (event) { console.error(`socket closed! reason: ${event.reason}`) }
+        console.log('Connected to server!')
+        socket.onclose = function (event) {
+            console.error(`Socket closed! reason: ${event.reason}`)
+            if (!noRefresh) window.location.reload()
+        }
     }
     socket.onmessage = function (event) {
         const message = event.data as string
         const [task, ...args] = message.split(' ')
         const taskInfo = tasks[task]
         if (taskInfo) {
-            if (noChat && task.startsWith('chat')) return
+            if (taskInfo.Mode && !modeSet(taskInfo.Mode)) return
 
             const [correctNumberOfArgs, errorAmount] = testArgLength(args.length, taskInfo)
             if (!correctNumberOfArgs) {

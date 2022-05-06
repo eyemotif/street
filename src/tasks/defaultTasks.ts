@@ -34,6 +34,7 @@ registerTask('~channel', {
 })
 
 registerTask('audio', {
+    Mode: 'audio',
     ExpectedArgs: { type: 'atLeast', value: 1 },
     OnTask: (args, _respond): Result<string> => {
         const audioComponents = new Set<string>(getComponentNames()['audio'])
@@ -63,6 +64,7 @@ registerTask('audio', {
 })
 
 registerTask('chat', {
+    Mode: 'chat',
     ExpectedArgs: { type: 'atLeast', value: 3 },
     OnTask: (args, _respond): Result<string> => {
         const [username, replaceString, ...words] = args
@@ -99,6 +101,7 @@ registerTask('chat', {
 })
 
 registerTask('chat.user', {
+    Mode: 'chat',
     ExpectedArgs: { type: 'exactly', value: 5 },
     OnTask: (args, _respond): Result<string> => {
         const [user, display, color, badges, badgeInfo] = args
@@ -140,6 +143,7 @@ registerTask('chat.user', {
 })
 
 registerTask('chat.clear', {
+    Mode: 'chat',
     ExpectedArgs: { type: 'exactly', value: 0 },
     OnTask: (_args, _respond): Result<string> => {
         document.getElementById('chat')!.replaceChildren()

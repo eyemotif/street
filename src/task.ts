@@ -11,6 +11,7 @@ import { Result } from './result'
 */
 
 export type TaskInfo = {
+    Mode?: string
     ExpectedArgs: Bounds
     OnTask: (args: string[], respond: (message: string) => void) => Result<string>
 }
