@@ -13,24 +13,26 @@ window.onload = () => {
     const url = new URL(window.location.href)
     const channel = url.searchParams.get('channel')
     const webSocketPort = url.searchParams.get('port') ?? '8000'
-    const noBadges = url.searchParams.get('noBadges') ?? 'false'
+    const noBadges = (url.searchParams.get('noBadges') ?? 'false') === 'true'
+    const noChat = (url.searchParams.get('noChat') ?? 'false') === 'true'
 
     getGlobalEmotes('all').then(_ => {
         console.log('Loaded global emotes!')
     })
     if (channel) {
-        // if twitch channel emotes are loaded here then anyone can use any channel emote
+        // if twitch channel emotes are loaded here then anyone can use the
+        // sub/follower emotes
         getChannelEmotes([EmoteProvider.SevenTV, EmoteProvider.BetterTTV, EmoteProvider.FrankerFaceZ], channel).then(_ => {
             console.log('Loaded channel emotes!')
         })
         setChannelID(channel)
             .then(() => {
-                setBadges(noBadges === 'true')
+                setBadges(noBadges)
                 console.log('Loaded channel badges!')
             })
     }
     else {
-        setBadges(noBadges === 'true')
+        setBadges(noBadges)
     }
 
     const components = getComponents()
@@ -41,7 +43,7 @@ window.onload = () => {
             addComponent(componentType, componentName, components[componentType][componentName])
     }
 
-    const socket = new WebSocket(`ws://localhost:${webSocketPort}`)
+    const socket = new WebSocket(`ws://${url.hostname}:${webSocketPort}`)
     socket.onopen = function () {
         console.log('connected to server!')
         socket.onclose = function (event) { console.error(`socket closed! reason: ${event.reason}`) }
@@ -51,6 +53,8 @@ window.onload = () => {
         const [task, ...args] = message.split(' ')
         const taskInfo = tasks[task]
         if (taskInfo) {
+            if (noChat && task.startsWith('chat')) return
+
             const [correctNumberOfArgs, errorAmount] = testArgLength(args.length, taskInfo)
             if (!correctNumberOfArgs) {
                 socket.send(`Invalid number of arguments for task "${task}". Got ${args.length}, expected ${errorAmount}.`)
