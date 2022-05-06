@@ -5,6 +5,8 @@ export type BadgeSet = {
 }
 
 type GlobalBadges = {
+    broadcaster: Record<number, BadgeSet>,
+    moderator: Record<number, BadgeSet>,
     subscriber: Record<number, BadgeSet>
     bits: Record<number, BadgeSet>
 }
@@ -41,6 +43,11 @@ async function getBadges(url: string, badgeSet: string): Promise<Record<number, 
     return result
 }
 
+async function getSingleBadge(url: string, badgeSet: string, element: number): Promise<BadgeSet> {
+    const badgeRecord = await getBadges(url, badgeSet)
+    return badgeRecord[element]
+}
+
 export async function setChannelID(channel: string) {
     const response = await fetch(`https://emotes.adamcy.pl/v1/channel/${channel}/id`)
     if (!response.ok) throw `Invalid channel "${channel}".`
@@ -56,6 +63,8 @@ export async function setBadges(noBadges: boolean = false) {
             bitsBadges = {}
         }
         globalBadges = {
+            broadcaster: {},
+            moderator: {},
             subscriber: {},
             bits: {},
         }
@@ -67,6 +76,8 @@ export async function setBadges(noBadges: boolean = false) {
         }
 
         globalBadges = {
+            broadcaster: await getBadges(`https://badges.twitch.tv/v1/badges/global/display`, 'broadcaster'),
+            moderator: await getBadges(`https://badges.twitch.tv/v1/badges/global/display`, 'moderator'),
             subscriber: await getBadges(`https://badges.twitch.tv/v1/badges/global/display`, 'subscriber'),
             bits: await getBadges(`https://badges.twitch.tv/v1/badges/global/display`, 'bits'),
         }

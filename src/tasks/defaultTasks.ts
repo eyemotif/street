@@ -90,7 +90,8 @@ registerTask('chat', {
 
                 chatDiv.appendChild(chatP)
                 twemoji.parse(chatP)
-                if (chatDiv.childNodes.length > 20) chatDiv.removeChild(chatDiv.childNodes[0])
+
+                chatDiv.childNodes.forEach((el: any) => { if (el.getBoundingClientRect().y < 0) chatDiv.removeChild(el) })
             })
             .catch(e => { throw e })
         return [true]
@@ -107,6 +108,8 @@ registerTask('chat.user', {
         let userInfo: UserInfo = {
             DisplayName: display,
             Color: color,
+            Broadcaster: false,
+            Moderator: false,
             Subscriber: undefined,
             Bits: undefined
         }
@@ -115,6 +118,12 @@ registerTask('chat.user', {
             const [name, value] = badge.split('/')
             if (!name || !value) continue
             switch (name) {
+                case 'broadcaster':
+                    userInfo.Broadcaster = true
+                    break
+                case 'broadcaster':
+                    userInfo.Moderator = true
+                    break
                 case 'subscriber':
                     userInfo.Subscriber = parseInt(value)
                     break
