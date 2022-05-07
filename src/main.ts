@@ -33,13 +33,23 @@ function loadExternalResources(channel: string | null, noBadges: boolean) {
     }
 }
 
+function loudify() {
+    document.getElementsByTagName('body')[0].style.backgroundColor = 'red'
+}
+function refreshify() {
+    console.log('Refreshing in 5 seconds...')
+    setTimeout(() => window.location.reload(), 5000)
+}
+
 window.onload = () => {
     const url = new URL(window.location.href)
     const modes = url.searchParams.get('mode')?.split(',') ?? 'all'
     const channel = url.searchParams.get('channel')
     const webSocketPort = url.searchParams.get('port') ?? '8000'
+
     const noBadges = url.searchParams.has('noBadges')
     const refresh = url.searchParams.has('refresh')
+    const loud = url.searchParams.has('loud')
 
     setModes(modes)
     console.log(`Modes set: ${modes}`)
@@ -60,7 +70,8 @@ window.onload = () => {
         console.log('Connected to server!')
         socket.onclose = function (event) {
             console.error(`Socket closed! reason: ${event.reason}`)
-            if (refresh) window.location.reload()
+            if (loud) loudify()
+            if (refresh) refreshify()
         }
     }
     socket.onmessage = function (event) {
@@ -79,5 +90,9 @@ window.onload = () => {
             if (!taskResult[0]) socket.send(taskResult[1])
         }
         else socket.send(`Invalid task "${task}"`)
+    }
+    socket.onerror = () => {
+        if (loud) loudify()
+        if (refresh) refreshify()
     }
 }

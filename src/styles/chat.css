@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Asap:wght@700&display=swap');
 
 body {
-    background-color: gray;
     height: 100%;
     overflow: hidden;
 }
@@ -31,11 +30,11 @@ body {
     width: auto
 }
 
-.emoji,
-.badge {
+.emoji {
     height: 3rem;
 }
 
 .badge {
     padding: 0.25rem;
+    height: 2.5rem;
 }
