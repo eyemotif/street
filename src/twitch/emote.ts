@@ -130,51 +130,57 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
     let i = 0
     for (const word of words) {
         let emote: Emote | undefined = getCachedEmote(word)
-        if (!emote && replacers[i] && replaceEmotesCache[replacers[i]])
-            emote = replaceEmotesCache[replacers[i]]
-        else if (!emote && replacers[i]) {
-            let anim1: Response, anim2: Response, anim3: Response, anim4: Response
-            let isAnim = true
-            try {
-                anim1 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0`, { mode: 'cors' })
-                anim2 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/2.0`, { mode: 'cors' })
-                anim3 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/3.0`, { mode: 'cors' })
-                anim4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/4.0`, { mode: 'cors' })
-            }
-            catch {
-                isAnim = false
-            }
+        if (!emote) {
+            // emojis cause i to have an error of +1
+            const replacer = replacers[i] || replacers[i - 1]
+            if (replacer && replaceEmotesCache[replacer])
+                emote = replaceEmotesCache[replacer]
+            else if (!emote && replacer) {
+                let anim1: Response, anim2: Response, anim3: Response, anim4: Response
+                let isAnim = true
+                try {
+                    anim1 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/1.0`, { mode: 'cors' })
+                    anim2 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/2.0`, { mode: 'cors' })
+                    anim3 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/3.0`, { mode: 'cors' })
+                    anim4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/4.0`, { mode: 'cors' })
+                }
+                catch {
+                    isAnim = false
+                }
 
-            if (isAnim) {
-                console.log(`anim fetch ${replacers[i]}`)
-                emote = {
-                    Code: replacers[i],
-                    Provider: EmoteProvider.Twitch,
-                    X1: anim1!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0` : undefined,
-                    X2: anim2!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/2.0` : undefined,
-                    X3: anim3!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/3.0` : undefined,
-                    X4: anim4!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/4.0` : undefined,
+                if (isAnim) {
+                    console.log(`anim fetch ${replacer}`)
+                    emote = {
+                        Code: replacer,
+                        Provider: EmoteProvider.Twitch,
+                        X1: anim1!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/1.0` : undefined,
+                        X2: anim2!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/2.0` : undefined,
+                        X3: anim3!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/3.0` : undefined,
+                        X4: anim4!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/animated/light/4.0` : undefined,
+                    }
+                }
+                else {
+                    console.log(`static fetch ${replacer}`)
+
+                    const static1 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/1.0`, { mode: 'cors' })
+                    const static2 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/2.0`, { mode: 'cors' })
+                    const static3 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/3.0`, { mode: 'cors' })
+                    const static4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/4.0`, { mode: 'cors' })
+
+                    emote = {
+                        Code: replacer,
+                        Provider: EmoteProvider.Twitch,
+                        X1: static1.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/1.0` : undefined,
+                        X2: static2.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/2.0` : undefined,
+                        X3: static3.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/3.0` : undefined,
+                        X4: static4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacer}/static/light/4.0` : undefined,
+                    }
+                }
+                if (emote) {
+                    replaceEmotesCache[replacer] = emote
+                    console.log(`cached emote "${word}"`)
                 }
             }
-            else {
-                console.log(`static fetch ${replacers[i]}`)
-
-                const static1 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0`, { mode: 'cors' })
-                const static2 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/2.0`, { mode: 'cors' })
-                const static3 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/3.0`, { mode: 'cors' })
-                const static4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/4.0`, { mode: 'cors' })
-
-                emote = {
-                    Code: replacers[i],
-                    Provider: EmoteProvider.Twitch,
-                    X1: static1.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/1.0` : undefined,
-                    X2: static2.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/2.0` : undefined,
-                    X3: static3.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/3.0` : undefined,
-                    X4: static4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/4.0` : undefined,
-                }
-            }
-            if (emote)
-                replaceEmotesCache[replacers[i]] = emote
         }
 
         if (emote) {
@@ -186,7 +192,9 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
             emote = undefined
         }
         else current += word + ' '
-        i += word.length + 1
+        if (replacers[i - 1])
+            i += word.length
+        else i += word.length + 1
     }
 
     if (current.length > 0)

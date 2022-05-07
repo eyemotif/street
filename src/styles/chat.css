@@ -27,7 +27,6 @@ body {
 
 .chat img {
     vertical-align: middle;
-    padding: 0.25rem;
     max-height: 4rem;
     width: auto
 }
@@ -37,6 +36,6 @@ body {
     height: 3rem;
 }
 
-img.emote {
-    padding: 0px;
+.badge {
+    padding: 0.25rem;
 }
