@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Asap:wght@700&display=swap');
+
+.alert {
+    font-family: 'Asap';
+    text-align: center;
+    overflow-wrap: break-word !important;
+
+    opacity: 1;
+    animation: fade 20s linear;
+
+    margin: 1rem 0% 0% 0%;
+    min-width: 25%;
+    max-width: 50%;
+}
+
+@keyframes fade {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    5%,
+    95% {
+        opacity: 1;
+    }
+}
+
+.alert .head {
+    font-size: 3rem;
+    color: #f4be38;
+    text-shadow: 0.25rem 0.25rem black;
+    margin: 0% 0% 1.5rem 0%
+}
+
+.alert .body {
+    font-size: 1.5rem;
+    color: white;
+    text-shadow: 0.125rem 0.125rem black;
+}
+
+.alert .body img {
+    vertical-align: middle;
+    max-height: 2rem;
+    width: auto
+}
+
+.alert .body .emoji {
+    height: 1.5rem
+}

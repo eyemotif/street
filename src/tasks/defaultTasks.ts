@@ -1,11 +1,10 @@
 import { registerTask } from '../task'
-import { getComponent, htmlEscape } from '../page'
-import { Result } from '../result'
+import { getComponent, messageToParagraph } from '../page'
+import { Result } from '../utils/result'
 import { getComponentNames } from '../component'
-import { getMediaQueue, MAX_QUEUE_LENGTH, setMediaQueue } from '../queue'
-import { replaceEmotes } from '../twitch/emote'
-import twemoji from 'twemoji'
-import { getCachedUser, getUserBadges, setCachedUser, UserInfo } from '../twitch/chatter'
+import { getAlertQueue, getMediaQueue, MAX_QUEUE_LENGTH, setAlertQueue, setMediaQueue } from '../queue'
+import { setCachedUser, UserInfo } from '../twitch/chatter'
+import { Alert, AlertType, showAlert } from '../alert'
 
 registerTask('~components', {
     ExpectedArgs: { type: 'exactly', value: 0 },
@@ -68,34 +67,18 @@ registerTask('chat', {
     ExpectedArgs: { type: 'atLeast', value: 3 },
     OnTask: (args, _respond): Result<string> => {
         const [username, replaceString, ...words] = args
-        const cachedUser = getCachedUser(username)
-        replaceEmotes(words, replaceString.substring(1))
-            .then(replacement => {
-                let chatDiv = document.getElementById('chat')!
-                let chatP = document.createElement('p')
-                chatP.className = 'chat'
+        const chatDiv = document.getElementById('chat')!
+        const chatP = document.createElement('p')
 
-                if (cachedUser) {
-                    for (const badge of getUserBadges(cachedUser)) {
-                        chatP.innerHTML += `<img class="badge" src="${badge.X4}"></img>`
-                    }
-                }
-                chatP.innerHTML += `<span style="color:${cachedUser?.Color ?? ''}">${cachedUser?.DisplayName ?? username}</span>: `
-                chatP.innerHTML +=
-                    replacement.map(r => {
-                        switch (r.type) {
-                            case 'text': return htmlEscape(r.text)
-                            case 'emote': return `<img class="emote" src="${r.emote.X4 ?? r.emote.X3 ?? r.emote.X2 ?? r.emote.X1}"></img>`
-                        }
-                    })
-                        .join(' ')
+        chatP.className = 'chat'
+        chatP.dataset.time = Date.now().toString()
+        chatDiv.appendChild(chatP)
 
-                chatDiv.appendChild(chatP)
-                twemoji.parse(chatP)
-
+        messageToParagraph(chatP, username, replaceString, words)
+            .then(_ => {
                 chatDiv.childNodes.forEach((el: any) => { if (el.getBoundingClientRect().y < 0) chatDiv.removeChild(el) })
             })
-            .catch(e => { throw e })
+
         return [true]
     }
 })
@@ -147,6 +130,78 @@ registerTask('chat.clear', {
     ExpectedArgs: { type: 'exactly', value: 0 },
     OnTask: (_args, _respond): Result<string> => {
         document.getElementById('chat')!.replaceChildren()
+        return [true]
+    }
+})
+
+registerTask('alert', {
+    Mode: 'alert',
+    ExpectedArgs: { type: 'atLeast', value: 4 },
+    OnTask: (args, _respond): Result<string> => {
+        const [type, username, mainArg, replacer, ...body] = args
+
+        let alertType: AlertType
+        switch (type) {
+            case 'follow':
+                alertType = AlertType.Follow
+                break
+            case 'subscribe':
+                alertType = AlertType.Subscribe
+                break
+            case 'bits':
+                alertType = AlertType.Bits
+                break
+            default:
+                return [false, `Invalid alert type "${type}".`]
+        }
+        let alertHead: any = {
+            Username: username,
+            Body: body,
+            BodyReplacer: replacer.substring(1),
+            Type: alertType,
+        }
+        let alert: Alert
+
+        switch (alertType) {
+            case AlertType.Follow:
+                alert = Object.assign(alertHead, {
+                    body: []
+                }) as Alert
+                break
+            case AlertType.Subscribe:
+                const [months, gift] = mainArg.split('/')
+                alert = Object.assign(alertHead, {
+                    Months: parseInt(months),
+                    GiftTo: gift,
+                }) as Alert
+                break
+            case AlertType.Bits:
+                alert = Object.assign(alertHead, {
+                    Amount: parseInt(mainArg)
+                })
+                break
+        }
+
+        const alertQueue = getAlertQueue()
+        alertQueue.push(alert)
+
+        if (alertQueue.length === 1) {
+            showAlert(alert, alert => {
+                switch (alert.Type) {
+                    case AlertType.Follow:
+                        return `Thanks for the follow, ${username}! :3`
+                    case AlertType.Subscribe:
+                        if (alert.GiftTo)
+                            return `Thanks for the gift to ${alert.GiftTo}, ${username}! :3`
+                        else
+                            return `Thanks for the ${alert.Months} month ${alert.Months === 1 ? 'subscription' : 'resubscription'}, ${username}! :3`
+                    case AlertType.Bits:
+                        return `Thanks for the ${alert.Amount} ${alert.Amount === 1 ? 'bit' : 'bits'}, ${username}! :3`
+                }
+            })
+        }
+
+        setAlertQueue(alertQueue)
         return [true]
     }
 })

@@ -1,5 +1,5 @@
-import { Bounds } from './bounds'
-import { Result } from './result'
+import { Bounds } from './utils/bounds'
+import { Result } from './utils/result'
 
 /*
         General guide for task names:

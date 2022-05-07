@@ -10,7 +10,7 @@ import { EmoteProvider, getChannelEmotes, getGlobalEmotes } from './twitch/emote
 import { setBadges, setChannelID } from './twitch/channel'
 
 function loadExternalResources(channel: string | null, noBadges: boolean) {
-    if (modeSet('chat')) {
+    if (modeSet('chat') || modeSet('alert')) {
         getGlobalEmotes('all').then(_ => {
             console.log('Loaded global emotes!')
         })

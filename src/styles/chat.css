@@ -6,7 +6,7 @@ body {
 }
 
 #chat {
-    width: calc(100%);
+    width: 100%;
     position: absolute;
     bottom: 0;
 
