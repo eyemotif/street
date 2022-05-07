@@ -53,6 +53,7 @@ export function emoteFromJson(json: any): Emote {
 }
 
 let emotesCache: Record<string, Emote> = {}
+let replaceEmotesCache: Record<string, Emote> = {}
 
 function servicesString(services: EmoteProvider[] | 'all'): string {
     if (services === 'all') return 'all'
@@ -129,8 +130,11 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
     let i = 0
     for (const word of words) {
         let emote: Emote | undefined = getCachedEmote(word)
-        if (!emote && replacers[i]) {
+        if (!emote && replacers[i] && replaceEmotesCache[replacers[i]])
+            emote = replaceEmotesCache[replacers[i]]
+        else if (!emote && replacers[i]) {
             let anim1: Response, anim2: Response, anim3: Response, anim4: Response
+            let isAnim = true
             try {
                 anim1 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0`, { mode: 'cors' })
                 anim2 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/2.0`, { mode: 'cors' })
@@ -138,20 +142,18 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
                 anim4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/4.0`, { mode: 'cors' })
             }
             catch {
-                // setting the mode to be 'cors' throws an exception on a 404.
-                // setting the mods to be 'no-cors' will always set "ok" to be false.
-                anim1 = anim2 = anim3 = anim4 = await fetch(`https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0`, { mode: 'no-cors' })
+                isAnim = false
             }
 
-            if (anim1.ok || anim2.ok || anim3.ok || anim4.ok) {
+            if (isAnim) {
                 console.log(`anim fetch ${replacers[i]}`)
                 emote = {
                     Code: replacers[i],
                     Provider: EmoteProvider.Twitch,
-                    X1: anim1.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0` : undefined,
-                    X2: anim2.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/2.0` : undefined,
-                    X3: anim3.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/3.0` : undefined,
-                    X4: anim4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/4.0` : undefined,
+                    X1: anim1!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/1.0` : undefined,
+                    X2: anim2!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/2.0` : undefined,
+                    X3: anim3!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/3.0` : undefined,
+                    X4: anim4!.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/animated/light/4.0` : undefined,
                 }
             }
             else {
@@ -171,6 +173,8 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
                     X4: static4.ok ? `https://static-cdn.jtvnw.net/emoticons/v2/${replacers[i]}/static/light/4.0` : undefined,
                 }
             }
+            if (emote)
+                replaceEmotesCache[replacers[i]] = emote
         }
 
         if (emote) {

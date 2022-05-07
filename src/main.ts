@@ -38,8 +38,8 @@ window.onload = () => {
     const modes = url.searchParams.get('mode')?.split(',') ?? 'all'
     const channel = url.searchParams.get('channel')
     const webSocketPort = url.searchParams.get('port') ?? '8000'
-    const noBadges = (url.searchParams.get('noBadges') ?? 'false') === 'true'
-    const noRefresh = (url.searchParams.get('noRefresh') ?? 'false') === 'true'
+    const noBadges = url.searchParams.has('noBadges')
+    const refresh = url.searchParams.has('refresh')
 
     setModes(modes)
     console.log(`Modes set: ${modes}`)
@@ -60,7 +60,7 @@ window.onload = () => {
         console.log('Connected to server!')
         socket.onclose = function (event) {
             console.error(`Socket closed! reason: ${event.reason}`)
-            if (!noRefresh) window.location.reload()
+            if (refresh) window.location.reload()
         }
     }
     socket.onmessage = function (event) {

@@ -84,7 +84,7 @@ registerTask('chat', {
                 chatP.innerHTML +=
                     replacement.map(r => {
                         switch (r.type) {
-                            case 'text': return htmlEscape(r.text + ' ')
+                            case 'text': return htmlEscape(r.text)
                             case 'emote': return `<img class="emote" src="${r.emote.X4 ?? r.emote.X3 ?? r.emote.X2 ?? r.emote.X1}"></img>`
                         }
                     })
