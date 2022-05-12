@@ -129,10 +129,21 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
 
     let i = 0
     for (const word of words) {
+        const isEmoji = /\p{Emoji}/gu.test(word)
+
         let emote: Emote | undefined = getCachedEmote(word)
-        if (!emote) {
-            // emojis cause i to have an error of +1
-            const replacer = replacers[i] || replacers[i - 1]
+        let diff = 0
+        if (!emote && !isEmoji) {
+            // emojis cause i to have an error of +1, so we search backwards
+            // until we find an emote or hit the beginning of the string
+            for (; replacers[i - diff] === undefined; diff++) {
+                if (i - diff < 0) {
+                    diff = 0
+                    break
+                }
+            }
+            const replacer = replacers[i - diff]
+
             if (replacer && replaceEmotesCache[replacer])
                 emote = replaceEmotesCache[replacer]
             else if (!emote && replacer) {
@@ -181,6 +192,8 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
                     console.log(`cached emote "${word}"`)
                 }
             }
+
+            delete replacers[i - diff]
         }
 
         if (emote) {
@@ -192,9 +205,7 @@ export async function replaceEmotes(words: string[], replaceString?: string): Pr
             emote = undefined
         }
         else current += word + ' '
-        if (replacers[i - 1])
-            i += word.length
-        else i += word.length + 1
+        i += word.length + 1 - diff
     }
 
     if (current.length > 0)
