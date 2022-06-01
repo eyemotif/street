@@ -47,11 +47,11 @@ addEvent('end', 'alert', type => {
         showAlert(alertQueue[0], alert => {
             switch (alert.Type) {
                 case AlertType.Follow:
-                    return `Thanks for the follow, ${alert.Username}! :3`
+                    return `Thanks for the follow, %%!!! :3`
                 case AlertType.Subscribe:
-                    return `Thanks for the ${alert.Months} month ${alert.Months === 1 ? 'subscription' : 'resubscription'}, ${alert.Username}! :3`
+                    return `Thanks for the ${alert.Months} month ${alert.Months === 1 ? 'subscription' : 'resubscription'}, %%!!! :3`
                 case AlertType.Bits:
-                    return `Thanks for the ${alert.Amount} ${alert.Amount === 1 ? 'bit' : 'bits'}, ${alert.Username}! :3`
+                    return `Thanks for the ${alert.Amount} ${alert.Amount === 1 ? 'bit' : 'bits'}, %%!!! :3`
             }
         })
     }

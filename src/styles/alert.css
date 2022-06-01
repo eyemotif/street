@@ -9,8 +9,8 @@
     animation: fade 20s linear;
 
     margin: 1rem 0% 0% 0%;
-    min-width: 25%;
-    max-width: 50%;
+    /* min-width: 25%; */
+    max-width: 25%;
 }
 
 @keyframes fade {
@@ -27,24 +27,28 @@
 }
 
 .alert .head {
-    font-size: 3rem;
-    color: #f4be38;
+    font-size: 4.5rem;
+    color: orange;
     text-shadow: 0.25rem 0.25rem black;
     margin: 0% 0% 1.5rem 0%
 }
 
+.alert .head .username {
+    color: #f4be38;
+}
+
 .alert .body {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
     color: white;
     text-shadow: 0.125rem 0.125rem black;
 }
 
 .alert .body img {
     vertical-align: middle;
-    max-height: 2rem;
+    max-height: 3rem;
     width: auto
 }
 
 .alert .body .emoji {
-    height: 1.5rem
+    height: 2.25rem
 }

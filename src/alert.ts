@@ -38,6 +38,7 @@ export async function showAlert(alert: Alert, headText: (alert: Alert) => string
     alertBody.className = 'body'
 
     alertHead.innerText = headText(alert)
+    alertHead.innerHTML = alertHead.innerHTML.replace('%%', `<span class="username">${alert.Username}</span>`)
     alertBody = await messageToParagraph(alertBody, alert.Username, alert.BodyReplacer, alert.Body, false)
 
     alertP.appendChild(alertHead)

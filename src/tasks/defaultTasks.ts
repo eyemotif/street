@@ -136,7 +136,7 @@ registerTask('chat.clear', {
 
 registerTask('alert', {
     Mode: 'alert',
-    ExpectedArgs: { type: 'atLeast', value: 4 },
+    ExpectedArgs: { type: 'atLeast', value: 5 },
     OnTask: (args, _respond): Result<string> => {
         const [type, username, mainArg, replacer, ...body] = args
 
@@ -189,14 +189,14 @@ registerTask('alert', {
             showAlert(alert, alert => {
                 switch (alert.Type) {
                     case AlertType.Follow:
-                        return `Thanks for the follow, ${username}! :3`
+                        return `Thanks for the follow, %%!!! :3`
                     case AlertType.Subscribe:
                         if (alert.GiftTo)
-                            return `Thanks for the gift to ${alert.GiftTo}, ${username}! :3`
+                            return `Thanks for the gift to ${alert.GiftTo}, %%!!! :3`
                         else
-                            return `Thanks for the ${alert.Months} month ${alert.Months === 1 ? 'subscription' : 'resubscription'}, ${username}! :3`
+                            return `Thanks for the ${alert.Months} month ${alert.Months === 1 ? 'subscription' : 'resubscription'}, %%!!! :3`
                     case AlertType.Bits:
-                        return `Thanks for the ${alert.Amount} ${alert.Amount === 1 ? 'bit' : 'bits'}, ${username}! :3`
+                        return `Thanks for the ${alert.Amount} ${alert.Amount === 1 ? 'bit' : 'bits'}, %%!!! :3`
                 }
             })
         }
