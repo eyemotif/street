@@ -62,6 +62,22 @@ registerTask('audio', {
     }
 })
 
+registerTask('audio.volume', {
+    Mode: 'audio',
+    ExpectedArgs: { type: 'exactly', value: 1 },
+    OnTask: (args, _respond): Result<string> => {
+        const volume = parseFloat(args[0])
+        if (isNaN(volume) || volume < 0 || volume > 1) {
+            return [false, `Invalid volume "${args[0]}".`]
+        }
+        for (const name of getComponentNames()['audio']) {
+            const component = getComponent('audio', name)! as HTMLAudioElement
+            component.volume = volume
+        }
+        return [true]
+    }
+})
+
 registerTask('chat', {
     Mode: 'chat',
     ExpectedArgs: { type: 'atLeast', value: 3 },

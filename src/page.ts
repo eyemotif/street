@@ -32,6 +32,7 @@ export function addComponent(type: string, name: string, component: ComponentInf
             let audioTag = document.createElement('audio')
             audioTag.id = `audio-${name}`
             audioTag.onended = () => fireEvent('end', 'audio', name)
+            audioTag.volume = 0.2
 
             let sourceTag = document.createElement('source')
             sourceTag.src = component.Path
